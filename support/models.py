@@ -13,13 +13,13 @@ class Conversation(models.Model):
 class Message(models.Model):
 
     ROLE_CHOICES = [
-        ('user', 'USER'),
-        ('agent', 'Agent')
+        ('user', 'User'),
+        ('assistant', 'Assistant')
     ]
 
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    context = models.TextField()
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

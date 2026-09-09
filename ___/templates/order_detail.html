@@ -343,6 +343,20 @@
 </div>
 <script>
 
+  function showTyping(){
+    const messages = document.getElementById('chat-messages');
+    messages.insertAdjacentHTML('beforeend', `
+    <div id="typing-indicator" class="agent-message p-2" style="font-size:13px;max-width:85%;">
+      Typing...
+    </div>
+    `);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function hideTyping(){
+    document.getElementById('typing-indicator').remove();
+  }
+
   function showChat(){
     document.getElementById("help-card").style.display = 'none';
     const chatBox = document.getElementById("chat-box");
@@ -358,18 +372,52 @@
     div.style.maxWidth = "85%";
     div.innerText = text;
     messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
   }
 
-  function sendMessage(){
+  async function sendMessage(){
     const input = document.getElementById("chat-input");
     const message = input.value.trim();
+
+    //console.log('Message->', message);
 
     //don't send empty message
     if(!message) return;
 
     appendMessage(message, "customer");
+
     input.value = "";
-  }
+    input.disabled = true;
+
+    const typingTimeout = setTimeout(() => showTyping(), 2000 );  //show typing after 2 seconds
+
+    //send message to django view
+    try{
+      const response = await fetch('/support/chat/{{ order.id }}/',{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({message: message})
+      }); 
+      const data =  await response.json();
+      hideTyping();
+      appendMessage(data.reply, 'agent');
+      input.disabled = false;
+      input.focus();
+
+    }catch(error){
+      console.error('Error ', error);
+      appendMessage('Sorry, something went wrong', 'agent');
+      input.disabled = false;
+      input.focus();
+    }
+    finally{
+      clearTimeout(typingTimeout);
+      hideTyping();     
+    }
+  }  
 
   //Send message on Enter key only
   document.getElementById("chat-input").addEventListener('keydown', function(e){

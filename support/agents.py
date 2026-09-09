@@ -1,6 +1,7 @@
 from anthropic import Anthropic
 from django.conf import settings
 from .tools import get_order_details, get_refund_history, check_delivery_status
+from .models import Conversation, Message, AgentLog
 
 # Initialize Anthropic Agent
 client = Anthropic(api_key=settings.ANTHROPIC_API_KEY)
@@ -21,6 +22,7 @@ Your Personality:
 - Be Friendly and professional
 - Be patient even when customer is angry
 - Be clear and consice in your replies
+- No emojis
 
 Important Rules:
 - Always check order details first before responding
@@ -91,3 +93,29 @@ def execute_tool(tool_name, tool_input):
 
 
 # Agent Loop --> while loop until task is done
+def run_support_agent(user_message, conversation_id):
+    conv = Conversation.objects.get(id=conversation_id)
+    conversation_messages = []
+    for msg in conv.messages.order_by('created_at'):
+        conversation_messages.append({
+            'role': msg.role,
+            'content': msg.content
+        })
+
+    # Send this conversation to LLM
+    response = client.messages.create(
+        model=anthropic_model,
+        max_tokens=1024, # approx 750 words
+        thinking={"type": "disabled"},  # <--- Add this for claude-sonnet-5
+        system=SUPPORT_SYSTEM_PROMPT,
+        messages=conversation_messages
+    )
+
+    # print('LLM Response==>', response)
+    final_text = response.content[0].text
+
+    return final_text
+
+
+
+
