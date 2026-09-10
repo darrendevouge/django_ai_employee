@@ -93,7 +93,7 @@ def execute_tool(tool_name, tool_input):
 
 
 # Agent Loop --> while loop until task is done
-def run_support_agent(user_message, conversation_id):
+def run_support_agent(user_message, conversation_id, order_id, user_id):
     conv = Conversation.objects.get(id=conversation_id)
     conversation_messages = []
     for msg in conv.messages.order_by('created_at'):
@@ -107,7 +107,7 @@ def run_support_agent(user_message, conversation_id):
         model=anthropic_model,
         max_tokens=1024, # approx 750 words
         thinking={"type": "disabled"},  # <--- Add this for claude-sonnet-5
-        system=SUPPORT_SYSTEM_PROMPT,
+        system=SUPPORT_SYSTEM_PROMPT + f'\n\nContext:\n- This conversation is about order id: #{order_id} and user: #{user_id}',
         messages=conversation_messages
     )
 

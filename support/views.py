@@ -22,7 +22,7 @@ def chat(request, order_id):
         Message.objects.create(conversation=conversation, role='user', content=user_message)
 
         # Send user message and conversation to LLM
-        reply = run_support_agent(user_message, conversation.id)
+        reply = run_support_agent(user_message, conversation.id, order.id, request.user.id)
 
         # Store the LLM reply
         Message.objects.create(conversation=conversation, role='assistant', content=reply)
