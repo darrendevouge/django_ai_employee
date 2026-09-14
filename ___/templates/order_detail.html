@@ -354,7 +354,12 @@
   }
 
   function hideTyping(){
-    document.getElementById('typing-indicator').remove();
+  
+    if(document.getElementById('typing-indicator')){
+      setTimeout(() => {
+       document.getElementById('typing-indicator').remove()
+      }, 2000);     
+    }   
   }
 
   function showChat(){

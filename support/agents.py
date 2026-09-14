@@ -46,36 +46,38 @@ SUPPORT_TOOLS = [
             'required': ['order_id']
         }
     },
+
     {
-        "name": "get_refund_history",
-        "description": "Get complete refund history for a user. Use this before making any refund related decisions.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "type": "integer",
-                    "description": "The user ID to check refund history for"
+        'name': 'get_refund_history',
+        'description': 'Get complete refund history for a user. Use this before making any refund related decisions.',
+        'input_schema': {
+            'type': 'object',
+            'properties': {
+                'user_id': {
+                    'type': 'integer',
+                    'description': 'The user ID to check refund history for'
                 }
             },
-            "required": ["user_id"]
+            'required': ['user_id']
         }
     },
+
     {
-        "name": "check_delivery_status",
-        "description": "Check current delivery status using tracking number and carrier. Use this when customer complains about delayed or missing delivery.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "tracking_number": {
-                    "type": "string",
-                    "description": "The shipment tracking number"
+        'name': 'check_delivery_status',
+        'description': 'Check current delivery status using tracking number and carrier. Use this when customer complains about delayed or missing delivery.',
+        'input_schema': {
+            'type': 'object',
+            'properties': {
+                'tracking_number': {
+                    'type': 'string',
+                    'description': 'The shipment tracking number'
                 },
-                "carrier": {
-                    "type": "string",
-                    "description": "The carrier name for example BlueDart or Delivery"
+                'carrier': {
+                    'type': 'string',
+                    'description': 'The carrier name for example BlueDart or Delivery'
                 }
             },
-            "required": ["tracking_number", "carrier"]
+            'required': ['tracking_number', 'carrier']
         }
     },    
 ]
@@ -103,18 +105,62 @@ def run_support_agent(user_message, conversation_id, order_id, user_id):
         })
 
     # Send this conversation to LLM
-    response = client.messages.create(
-        model=anthropic_model,
-        max_tokens=1024, # approx 750 words
-        thinking={"type": "disabled"},  # <--- Add this for claude-sonnet-5
-        system=SUPPORT_SYSTEM_PROMPT + f'\n\nContext:\n- This conversation is about order id: #{order_id} and user: #{user_id}',
-        messages=conversation_messages
-    )
+    while True:
+        response = client.messages.create(
+            model=anthropic_model,
+            max_tokens=1024, # approx 750 words
+            system=SUPPORT_SYSTEM_PROMPT + f'\n\nContext:\n- This conversation is about order id: #{order_id} and user: #{user_id}',
+            tools=SUPPORT_TOOLS,
+            messages=conversation_messages
+        )
 
-    # print('LLM Response==>', response)
-    final_text = response.content[0].text
+        print('stop_reason==>', response.stop_reason)
+        print('content==>', response.content)
 
-    return final_text
+        if response.stop_reason == 'tool_use':
+            tool_result = []
+            for block in response.content:
+                if block.type == 'tool_use':
+                    print('tool call==>', block.name)
+                    print('tool input==>', block.input)
+
+                     # Execute the tool
+                    result = execute_tool(block.name, block.input)
+                    print('tool_result', result)
+
+                    tool_result.append({
+                        'type': 'tool_result',
+                        'tool_use_id': block.id,
+                        'content': str(result)
+                     })
+
+            conversation_messages.append({
+                'role': 'assistant',
+                'content': response.content
+            })
+
+            conversation_messages.append({
+                'role': 'user',
+                'content': tool_result
+            })
+
+            final_text = ""
+            for block in response.content:
+                if hasattr(block, 'text'):
+                    final_text = block.text
+                break
+            
+            return final_text
+
+        else:
+            return response.content[0].text
+
+
+       
+
+       
+
+    
 
 
 
