@@ -142,15 +142,7 @@ def run_support_agent(user_message, conversation_id, order_id, user_id):
             conversation_messages.append({
                 'role': 'user',
                 'content': tool_result
-            })
-
-            final_text = ""
-            for block in response.content:
-                if hasattr(block, 'text'):
-                    final_text = block.text
-                break
-            
-            return final_text
+            })           
 
         else:
             return response.content[0].text
