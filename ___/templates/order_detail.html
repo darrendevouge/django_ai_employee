@@ -218,6 +218,7 @@
     .agent-message{
       background: #f3f4f6;
       border-radius: 0 10px 10px 10px;
+      white-space: pre-line;
     }
 
     .customer-message{
@@ -327,10 +328,25 @@
         </div>
         <!-- Chat area-->
         <div id="chat-messages" class="chat-messages p-3 d-flex flex-column gap-2">
-          <div class="agent-message p-2 px-3" style="font-size: 13px; max-width: 85%;">
-            Hi User, I'm Maya.  How can I help you with your order today?
-          </div>        
+      {% if conversation %}
+        <!-- Print the previous messages -->
+        {% for msg in previous_messages %}
+          {% if msg.role == 'user' %}
+            <div class="customer-message p-2 px-3" style="font-size: 13px; max-width: 85%;">
+              {{ msg.content }}
+            </div>
+          {% else %}
+            <div class="agent-message p-2 px-3" style="font-size: 13px; max-width: 85%;">
+              {{ msg.content }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% else %} 
+        <div class="agent-message p-2 px-3" style="font-size: 13px; max-width: 85%;">
+        Hi {{ request.user.first_name }}, I'm Maya.  How can I help you with your order today?
         </div>
+      {% endif %}        
+      </div>
         <!-- Chat footer-->
         <div class="card-footer d-flex">
           <input type="text" id="chat-input" class="form-control-sm" placeholder="Type your message...">

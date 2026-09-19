@@ -142,7 +142,8 @@ def run_support_agent(user_message, conversation_id, order_id, user_id):
             conversation_messages.append({
                 'role': 'user',
                 'content': tool_result
-            })           
+            })
+           
 
         else:
             return response.content[0].text
