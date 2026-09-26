@@ -232,6 +232,8 @@ def run_support_agent(user_message, conversation_id, order_id, user_id):
             for block in response.content:
                 if block.type == 'tool_use':                                        
                     result = execute_tool(block.name, block.input)
+                    print('tool being executed===>', block.name)
+                    print('block.input===>', block.input)
                     tool_result.append({
                         'type': 'tool_result',
                         'tool_use_id': block.id,

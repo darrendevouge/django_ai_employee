@@ -418,7 +418,7 @@
         body: JSON.stringify({message: message})
       }); 
       const data =  await response.json();
-      hideTyping();
+      //hideTyping();
       appendMessage(data.reply, 'agent');
       input.disabled = false;
       input.focus();
@@ -431,7 +431,7 @@
     }
     finally{
       clearTimeout(typingTimeout);
-      hideTyping();     
+      //hideTyping();     
     }
   }  
 
