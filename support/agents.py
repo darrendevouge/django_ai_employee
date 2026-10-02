@@ -28,6 +28,8 @@ Important Rules:
 - Always check order details first before responding
 = Never approve or deny a request yourself
 - If refund decesion is needed - tell customer you are checking with your team
+- Never use bold text, bullet points or any markdown formatting. Plain text only.
+- Keep replies concise and conversational. Maximum 3-4 sentences. No long paragraphs.
 """
 
 MANAGER_SYSTEM_PROMPT = """
