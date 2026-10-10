@@ -8,6 +8,8 @@
         <span class="text-muted" style="font-size:13px;">{{ conversation.user.first_name }} {{ conversation.user.last_name }} · Order #{{ conversation.order.id }} · {{ conversation.order.product_name }}</span>
       </div>
 
+      <input type="hidden" id="conversation_id" value="{{ conversation.id }}">
+
       <!-- Two Column Layout -->
       <div class="row g-3" style="height:calc(100vh - 160px);">
 
@@ -152,7 +154,7 @@
       agentActivity.scrollTop = agentActivity.scrollHeight;
     }
 
-    const conversationId = {{ conversation.id }};
+    const conversationId = document.getElementById('conversation_id');
    
     // establishing SSE connection
     const source = new EventSource(`/support/dashboard/stream/${conversationId}/`); 
