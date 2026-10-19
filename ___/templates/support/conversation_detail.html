@@ -87,7 +87,8 @@
         </div>
 
       </div>
-      <script>
+
+  <script>
 
     function appendMessage(role, name, message){
       const chatTranscript = document.getElementById("chat-transcript");
@@ -154,10 +155,11 @@
       agentActivity.scrollTop = agentActivity.scrollHeight;
     }
 
-    const conversationId = document.getElementById('conversation_id');
-   
-    // establishing SSE connection
-    const source = new EventSource(`/support/dashboard/stream/${conversationId}/`); 
+      const conversationId = document.getElementById('conversation_id');
+
+
+    //const conversationId = {{ conversation.id }};
+    const source = new EventSource(`/support/dashboard/stream/${conversationId}/`); // establishing SSE connection
 
     source.onmessage = (e) => {
       const event = JSON.parse(e.data);
@@ -204,6 +206,4 @@
       }
     })
   </script>
-
-  
 {% endblock %}
